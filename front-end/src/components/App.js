@@ -1,4 +1,13 @@
 import React, {  useState, useEffect } from 'react';
+
+import api from '../services/api';
+
+import { Transition } from 'react-spring/renderprops'
+
+
+
+// Styled
+
 import GlobalStyle from '../styles/global';
 import Container from '../styles/AppContainer';
 import Aside from '../styles/Aside';
@@ -8,6 +17,8 @@ import InputGroup from '../styles/InputGroup';
 
 export default function App()  {
   
+  const [devs, setDevs] = useState([])
+
   const [github_username, setGitHubUserName] = useState('');
   const [techs, setTechs] = useState('');
 
@@ -34,11 +45,33 @@ export default function App()  {
     )
   }, [])
 
+  useEffect(() => {
+
+    async function loadDevs() {
+      const response = await api.get('/devs')
+
+      setDevs(response.data)
+
+    }
+
+    loadDevs();
+
+  }, [])
 
   async function handleAddDev(e) {
-    e.preventDefault()
+      e.preventDefault()
 
+      const response = await api.post('/devs', {
+        github_username,
+        techs,
+        latitude,
+        longitude
+      })
 
+      setGitHubUserName('')
+      setTechs('')
+     
+      setDevs([...devs, response.data])
 
   }
 
@@ -79,59 +112,29 @@ export default function App()  {
                 </InputBlock>
               </InputGroup>
 
-              <button type="submit">Salvar</button>
+              <button onClick={handleAddDev} type="submit">Salvar</button>
             </form>
           </Aside>
           <Main>
             <ul>
-              <li className="dev-item">
+            {devs.map(dev => (
+
+              <li key={dev._id} className="dev-item">
                 <header>
-                  <img src="https://avatars2.githubusercontent.com/u/43914533?s=460&v=4" alt=""/>
+                  <img src={dev.avatar_url} alt={dev.name} />
                   <div className="user-info">
-                    <strong>Juliano Alves</strong>
-                    <span>React JS, React Native, Node JS</span>
+                    <strong>{dev.name}</strong>
+                    <span>{dev.techs.join(', ')}</span>
                     
                   </div>
                 </header>
-                <p>Hello, my name is Juliano Alves! I am a lover of technology and mainly web development. Hunting the programmer girlfriend.</p>
-                <a href="https://github.com/julianoalvescode">Acessar perfil no Github</a>
+                <p>{dev.bio}</p>
+                <a href={`https://github.com/${dev.github_username}`} target="_blank">Acessar perfil no Github</a>
               </li>
-              <li className="dev-item">
-                <header>
-                  <img src="https://images.unsplash.com/photo-1485206412256-701ccc5b93ca?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1000&q=80" alt=""/>
-                  <div className="user-info">
-                    <strong>José Alves</strong>
-                    <span>React JS, React Native, Node JS</span>
-                    
-                  </div>
-                </header>
-                <p>Hello, my name is Juliano Alves! I am a lover of technology and mainly web development. Hunting the programmer girlfriend.</p>
-                <a href="https://github.com/julianoalvescode">Acessar perfil no Github</a>
-              </li>
-              <li className="dev-item">
-                <header>
-                  <img src="https://avatars2.githubusercontent.com/u/4248081?s=400&v=4" alt=""/>
-                  <div className="user-info">
-                    <strong>Filipe Deschamps</strong>
-                    <span>React JS, React Native, Node JS</span>
-                    
-                  </div>
-                </header>
-                <p>A nice guy.</p>
-                <a href="https://github.com/julianoalvescode">Acessar perfil no Github</a>
-              </li>
-              <li className="dev-item">
-                <header>
-                  <img src="https://avatars1.githubusercontent.com/u/2254731?s=400&v=4" alt=""/>
-                  <div className="user-info">
-                    <strong>Diego Fernandes</strong>
-                    <span>React JS, React Native, Node JS</span>
-                    
-                  </div>
-                </header>
-                <p>CTO na @Rocketseat. Apaixonado pelas melhores tecnologias de desenvolvimento web e mobile.</p>
-                <a href="https://github.com/julianoalvescode">Acessar perfil no Github</a>
-              </li>
+
+
+            ))}
+              
             </ul>
           </Main>
         </Container>
