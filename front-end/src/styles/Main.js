@@ -29,6 +29,7 @@ const Main = styled.main`
             color: #8e4dff;
             text-decoration: none;
             font-size: 0.875rem;
+            cursor: pointer;
 
             &:hover {
                 color: #5d2ae6;
@@ -46,6 +47,7 @@ const Main = styled.main`
             width: 54px;
             height: 54px;
             border-radius: 50%;
+            cursor: pointer;
         }
 
         .user-info {
@@ -55,6 +57,7 @@ const Main = styled.main`
                 display: block;
                 font-size: 1rem;
                 color: #333;
+                cursor: pointer;
             }
 
             span {

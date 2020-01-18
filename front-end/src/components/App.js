@@ -2,8 +2,11 @@ import React, {  useState, useEffect } from 'react';
 
 import api from '../services/api';
 
-import { Transition } from 'react-spring/renderprops'
+import swal from 'sweetalert'
 
+import AOS from 'aos';
+import 'aos/dist/aos.css'; // You can also use <link> for styles
+// ..
 
 
 // Styled
@@ -12,38 +15,19 @@ import GlobalStyle from '../styles/global';
 import Container from '../styles/AppContainer';
 import Aside from '../styles/Aside';
 import Main from '../styles/Main';
-import InputBlock from '../styles/Input-block';
-import InputGroup from '../styles/InputGroup';
+
+import DevForm from './DevForm/index'
 
 export default function App()  {
   
   const [devs, setDevs] = useState([])
 
-  const [github_username, setGitHubUserName] = useState('');
-  const [techs, setTechs] = useState('');
-
-
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
 
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        
-        const { latitude, longitude } = position.coords;
 
-        setLatitude(latitude)
-        setLongitude(longitude)
+    AOS.init();
 
-      },
-      (error) => {
-        console.log(error)
-      },
-      {
-        timeout: 30000
-      }
-    )
-  }, [])
+  }, []) 
 
   useEffect(() => {
 
@@ -58,20 +42,15 @@ export default function App()  {
 
   }, [])
 
-  async function handleAddDev(e) {
-      e.preventDefault()
+  async function handleAddDev(data) {
 
-      const response = await api.post('/devs', {
-        github_username,
-        techs,
-        latitude,
-        longitude
-      })
 
-      setGitHubUserName('')
-      setTechs('')
-     
-      setDevs([...devs, response.data])
+      const response = await api.post('/devs', data)
+
+      await swal("Salvo", "Você registrou o usuário com sucesso.", "success");  
+
+      setDevs([...devs, response.data]) 
+      
 
   }
 
@@ -79,49 +58,18 @@ export default function App()  {
       <>
         <GlobalStyle/>
         <Container >
-          <Aside>
-          <strong>Cadastrar</strong>
-            <form>
-              <InputBlock>
-
-                <label htmlFor="github_username" >Usuário do Github </label>
-                <input type="text" name="github_username" id="username" value={github_username} onChange={e => setGitHubUserName(e.target.value)} />
-                
-              </InputBlock>
-
-              <InputBlock>
-                
-                <label htmlFor="techs" >Tecnologias</label>
-                <input type="text" name="techs" id="techs" value={techs} onChange={e => setTechs(e.target.value)} />
-              
-              </InputBlock>
-              
-              <InputGroup>
-                <InputBlock>
-
-                  <label htmlFor="latitude" >Latitude</label>
-                  <input type="text" name="latitude" id="latitude" required onChange={e => setLatitude(e.target.value)} value={latitude} />
-
-                </InputBlock>
-
-                <InputBlock>
-
-                  <label htmlFor="longitude" >Longitude</label>
-                  <input type="text" name="longitude" id="longitude" required onChange={e => setLongitude(e.target.value)} value={longitude}/>
-
-                </InputBlock>
-              </InputGroup>
-
-              <button onClick={handleAddDev} type="submit">Salvar</button>
-            </form>
+          <Aside data-aos="fade-in" data-aos-duration="5000">
+            <DevForm onSubmit={handleAddDev}></DevForm>            
           </Aside>
           <Main>
             <ul>
             {devs.map(dev => (
 
-              <li key={dev._id} className="dev-item">
+              <li data-aos="fade-in" data-aos-duration="4000" key={dev._id} className="dev-item">
                 <header>
-                  <img src={dev.avatar_url} alt={dev.name} />
+                  <a href={`https://github.com/${dev.github_username}`} target="_blank">
+                    <img src={dev.avatar_url} alt={dev.name} />
+                  </a>
                   <div className="user-info">
                     <strong>{dev.name}</strong>
                     <span>{dev.techs.join(', ')}</span>
@@ -129,7 +77,7 @@ export default function App()  {
                   </div>
                 </header>
                 <p>{dev.bio}</p>
-                <a href={`https://github.com/${dev.github_username}`} target="_blank">Acessar perfil no Github</a>
+                <a  href={`https://github.com/${dev.github_username}`} target="_blank">Acessar perfil no Github</a>
               </li>
 
 
